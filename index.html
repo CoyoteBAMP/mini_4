@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Arcade Zaire</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
+<style>
+:root{--bg:#0c0a1f;--bg2:#1a1240;--pk:#ff3d9a;--cy:#2de2e6;--yl:#ffd23f;--pu:#7b2cff;--fg:#f2f0ff;--mut:#9d97c9;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;color:var(--fg);background:radial-gradient(ellipse at 50% 0,var(--bg2),var(--bg) 70%) fixed,var(--bg);font:16px/1.5 "Trebuchet MS",Verdana,sans-serif}
+main{max-width:520px;margin:0 auto;padding:14px 14px 40px}
+.pf,.b,.sign,.hud,.nar{font-family:"Press Start 2P","Courier New",monospace}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.sign{font-size:14px;color:var(--pk);text-shadow:0 0 6px var(--pk),0 0 18px var(--pk)}
+.sign b{color:var(--cy);text-shadow:0 0 6px var(--cy),0 0 18px var(--cy);animation:fl 4s infinite}
+@keyframes fl{0%,90%,94%,100%{opacity:1}92%,96%{opacity:.3}}
+.hud{display:flex;gap:10px;align-items:center;font-size:10px;color:var(--yl)}
+.b{font-size:10px;line-height:1.4;padding:10px 12px;background:var(--bg);color:var(--cy);border:2px solid var(--cy);border-radius:6px;box-shadow:0 0 10px #2de2e655;cursor:pointer;touch-action:manipulation}
+.b.p{color:var(--pk);border-color:var(--pk);box-shadow:0 0 10px #ff3d9a55}.b.y{color:var(--yl);border-color:var(--yl);box-shadow:0 0 10px #ffd23f55}
+.b:active{transform:translateY(2px)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--yl);outline-offset:2px}
+.nar{min-height:76px;margin:12px 0;padding:10px;font-size:10px;line-height:1.8;color:var(--cy);background:#0006;border:2px solid var(--pk);border-radius:8px;box-shadow:inset 0 0 14px #ff3d9a33}
+.hero{text-align:center;padding:28px 0}
+.hero h1{font:22px/1.5 "Press Start 2P","Courier New",monospace;margin:0 0 18px;color:var(--yl);text-shadow:0 0 8px var(--yl),0 0 26px var(--pk)}
+.hero p{color:var(--mut)}
+.cabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.cab{background:linear-gradient(#2a1d63,#120d30);border:2px solid var(--pk);border-radius:10px;padding:12px 4px;color:var(--fg);font:9px/1.6 "Press Start 2P","Courier New",monospace;cursor:pointer;box-shadow:0 0 12px #ff3d9a44}
+.cab span{display:block;font-size:26px;margin-bottom:6px}
+.cab.ok{border-color:var(--yl);opacity:.6;box-shadow:none}
+canvas#cv{display:block;width:100%;max-width:420px;margin:14px auto 0;border:3px solid var(--pk);border-radius:12px;box-shadow:0 0 18px #ff3d9a88;touch-action:manipulation}
+.ctl{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap}.ctl .b{touch-action:none}
+.lib{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:14px;font:11px "Press Start 2P",monospace;color:var(--mut)}
+.dgt{display:inline-grid;place-items:center;width:28px;height:36px;border:2px solid var(--yl);color:var(--yl);border-radius:6px;font-size:16px}
+.mod{position:fixed;inset:0;z-index:10;display:grid;place-items:center;padding:16px;background:#000c}
+.mc{position:relative;width:100%;max-width:420px;max-height:90vh;overflow:auto;padding:20px 16px 16px;background:var(--bg2);border:2px solid var(--cy);border-radius:12px;box-shadow:0 0 24px #2de2e655}
+.x{position:absolute;top:8px;right:8px;padding:6px 8px}
+.s{font-size:10px;line-height:1.8;color:var(--cy);margin:0 24px 10px 0}
+.q{margin:8px 0 14px;font-size:1.05rem}
+.row{display:flex;gap:8px}
+input{flex:1;min-width:0;padding:10px;font:16px "Trebuchet MS",sans-serif;background:#000;color:var(--cy);border:2px solid var(--cy);border-radius:6px}
+.pads{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pad{height:84px;border:0;border-radius:14px;opacity:.4;cursor:pointer;transition:opacity .1s}
+.pad.lit{opacity:1;box-shadow:0 0 26px currentColor}
+.p0{background:var(--pk);color:var(--pk)}.p1{background:var(--cy);color:var(--cy)}.p2{background:var(--yl);color:var(--yl)}.p3{background:var(--pu);color:var(--pu)}
+.cap{font-size:48px;text-align:center;animation:pop .6s cubic-bezier(.2,1.5,.4,1)}
+@keyframes pop{from{transform:scale(.3) rotate(-20deg);opacity:0}to{transform:none;opacity:1}}
+.dg{font-size:22px;color:var(--yl)}
+.disp{font:22px "Press Start 2P",monospace;text-align:center;letter-spacing:10px;padding:12px;margin-bottom:10px;background:#000;color:var(--yl);border:2px solid var(--yl);border-radius:6px}
+.disp.sh{animation:sh .3s}@keyframes sh{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+#fin{position:fixed;inset:0;z-index:20;overflow:auto;padding:24px 16px;background:radial-gradient(ellipse at 50% 0,var(--bg2),var(--bg) 75%)}
+#fin>div{position:relative;z-index:2;max-width:460px;margin:0 auto;text-align:center}
+#fin h2{font:18px/1.6 "Press Start 2P",monospace;color:var(--yl);text-shadow:0 0 10px var(--pk);margin:20px 0}
+#fin ul{list-style:none;padding:0;margin:18px 0;text-align:left}
+#fin li{padding:12px;margin-bottom:8px;border:2px dashed var(--cy);border-radius:10px;background:#0005}
+#cf{position:fixed;inset:0;z-index:1;pointer-events:none}
+#lib{display:flex;gap:5px}.mg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.mc2{height:64px;font-size:28px;background:var(--bg);border:2px solid var(--pk);border-radius:8px;color:var(--fg);cursor:pointer}.mc2.f{background:var(--pu)}.mc2.m{opacity:.45}
+@media (prefers-reduced-motion:reduce){.sign b,.cap{animation:none}}
+</style>
+</head>
+<body>
+<main>
+<div class="top"><div class="sign" id="sign">ARCADE <b id="nm"></b></div><div class="hud"><span>FICHAS <span id="fch">0</span></span><button class="b" id="mt" aria-label="Sonido">SON</button></div></div>
+<div class="nar" id="nar" aria-live="polite"></div>
+
+<div id="title" class="hero">
+<h1>INSERT<br>COIN</h1>
+<p>El arcade abrió solo para ti. Al fondo hay una máquina de garra, pero no tiene fichas. Tendrás que ganártelas.</p>
+<button class="b y" id="go">START</button>
+</div>
+
+<div id="game" hidden>
+<div class="cabs">
+<button class="cab" id="ct"><span>💻</span>TERMINAL</button>
+<button class="cab" id="cs"><span>🚦</span>TABLERO</button>
+<button class="cab" id="ck"><span>🔐</span>CAJÓN</button>
+<button class="cab" id="cq"><span>🧅</span>PANTANO</button>
+<button class="cab" id="cm"><span>🃏</span>MEMORAMA</button>
+<button class="cab" id="cr"><span>⚡</span>REFLEJOS</button>
+</div>
+<canvas id="cv" width="360" height="400" aria-label="Máquina de garra"></canvas>
+<div class="ctl">
+<button class="b" id="lf" aria-label="Izquierda">◀</button>
+<button class="b p" id="dp">BAJAR · 1 FICHA</button>
+<button class="b" id="rt" aria-label="Derecha">▶</button>
+</div>
+<div class="lib"><span>CÓDIGO</span><span id="lib"></span></div>
+<div class="ctl"><button class="b y" id="sf" hidden>ABRIR CAJA FUERTE</button></div>
+</div>
+</main>
+
+<div class="mod" id="mod" hidden><div class="mc" id="mc"></div></div>
+<div id="fin" hidden><canvas id="cf"></canvas><div>
+<h2 id="ft"></h2><p id="fm" class="q"></p><ul id="fv"></ul>
+<button class="b y" onclick="location.reload()">JUGAR DE NUEVO</button></div></div>
+
+<script>
+const $=i=>document.getElementById(i);
+/* CONFIGURACIÓN: aquí se cambian textos, acertijos y vales */
+const C={name:"Zaire",digits:[7,2,4,9,1,3],
+msgs:["Quise regalarte un ratito para despejarte y sacarte una sonrisa.","Si quieres reír más puedo contarte uno de mis famosos chistes.","Un respiro, un sueño rápido y a seguir. Vas muy bien.","Si hoy fuera un nivel, definitivamente ya lo estás superando.","Todo se ve mejor después de una buena risa.","Último peluche. Lo mejor del día todavía puede venir."],
+riddle:"Si dices mi nombre, desaparezco. ¿Qué soy?",riddleA:"silencio",
+cipher:"PDQJR",cipherA:"mango",
+final:"Mi idea era ayudarte a despejarte un rato y a que tu día sea un poquito mejor. Aunque hoy vengas cansada o con sueño, tú puedes con esto y con mucho más, yo creo en ti."};
+const N=C.digits.length,PN=["Ogro","Burro","Galleta","Gato","Dragón"],PC=["#7bd34a","#a7a7b5","#d9a05b","#ff9a3c","#c06bff"];
+$("nm").textContent=C.name.toUpperCase();
+let fich=0,wins=0,mute=false,ac,tw;const done={};
+const norm=s=>s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
+
+/* sonido */
+function tone(f,d=.12,t="square",v=.06,w=0){if(mute)return;try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain(),T=ac.currentTime+w;o.type=t;o.frequency.value=f;g.gain.setValueAtTime(v,T);g.gain.exponentialRampToValueAtTime(.0001,T+d);o.connect(g).connect(ac.destination);o.start(T);o.stop(T+d)}catch(e){}}
+const coin=()=>{tone(988,.08);tone(1319,.3,"square",.06,.09)};
+const bad=()=>tone(140,.3,"sawtooth",.08);
+const jingle=()=>[523,659,784,1047,1319].forEach((f,i)=>tone(f,.2,"triangle",.09,i*.1));
+$("mt").onclick=()=>{mute=!mute;$("mt").textContent=mute?"MUDO":"SON"};
+
+/* ui */
+function say(t){clearInterval(tw);const n=$("nar");n.textContent="";let i=0;tw=setInterval(()=>{n.textContent+=t.charAt(i++);if(i>t.length)clearInterval(tw)},16)}
+const setF=n=>{fich=n;$("fch").textContent=n};
+function openMod(h){$("mc").innerHTML='<button class="b x" onclick="closeMod()" aria-label="Cerrar">X</button>'+h;$("mod").hidden=false}
+function closeMod(){$("mod").hidden=true;$("mc").innerHTML=""}
+function solve(k,id){if(done[k])return;done[k]=1;setF(fich+1);coin();closeMod();$(id).classList.add("ok");say("¡FICHA! Ahora tienes "+fich+". Ve a la máquina de garra.")}
+
+function textPuz(k,id,intro,q,ans){
+if(done[k]){say("Esa estación ya te dio su ficha.");return}
+openMod('<p class="pf s">'+intro+'</p><p class="q">'+q+'</p><div class="row"><input id="ti" autocomplete="off" aria-label="Respuesta"><button class="b" id="tb">OK</button></div><p id="tm" class="pf s" style="margin-top:12px"></p>');
+const go=()=>{if(norm($("ti").value)===ans)solve(k,id);else{bad();$("tm").textContent="Todavía no. Piénsalo otra vez."}};
+$("tb").onclick=go;$("ti").onkeydown=e=>{if(e.key==="Enter")go()};$("ti").focus()}
+
+function memo(){
+if(done.m){say("Esa estación ya te dio su ficha.");return}
+const E=["🧅","🐴","🍪","🏰","🐉","🐸"],d=[...E,...E].sort(()=>Math.random()-.5);let a=null,lock=false,m=0;
+openMod('<p class="pf s">MEMORAMA DEL PANTANO</p><p class="q">Encuentra las 6 parejas.</p><div class="mg">'+d.map((e,i)=>'<button class="mc2" aria-label="Carta '+(i+1)+'"></button>').join("")+"</div>");
+const B=[...$("mc").querySelectorAll(".mc2")];
+B.forEach((b,i)=>b.onclick=()=>{if(lock||b.textContent)return;b.textContent=d[i];b.classList.add("f");tone(500+i*20,.08);
+if(a===null){a=i;return}
+if(d[a]===d[i]){B[a].classList.add("m");b.classList.add("m");coin();a=null;if(++m===6)setTimeout(()=>solve("m","cm"),500)}
+else{lock=true;const j=a;a=null;bad();setTimeout(()=>{B[j].textContent=b.textContent="";B[j].classList.remove("f");b.classList.remove("f");lock=false},800)}})}
+function react(){
+if(done.r){say("Esa estación ya te dio su ficha.");return}
+let ok=0,t0=0,tm=0,st=0;
+openMod('<p class="pf s">REFLEJOS</p><p class="q">Toca el botón apenas se ponga verde. Consigue 3 aciertos.</p><button class="b" id="rb" style="width:100%;height:110px;font-size:13px">ESPERA…</button><p id="tm" class="pf s" style="margin-top:12px">Aciertos: 0/3</p>');
+const b=$("rb"),go=()=>{st=0;b.style.color="#fff";b.style.borderColor="var(--pk)";b.style.background="#3a0d2a";b.textContent="ESPERA…";tm=setTimeout(()=>{st=1;t0=Date.now();b.style.background="#0a7a3a";b.style.borderColor="#5dff9a";b.textContent="¡AHORA!";tone(880,.1)},1200+Math.random()*2200)};
+b.onclick=()=>{if(st===0){clearTimeout(tm);bad();$("tm").textContent="Muy pronto. Aciertos: "+ok+"/3";go();return}
+if(st===1){st=2;ok++;coin();$("tm").textContent="Aciertos: "+ok+"/3 · "+(Date.now()-t0)+" ms";if(ok>=3)setTimeout(()=>solve("r","cr"),600);else setTimeout(go,900)}};go()}
+function simon(){
+if(done.s){say("Esa estación ya te dio su ficha.");return}
+const seq=Array.from({length:4},()=>Math.random()*4|0);let pos=0,busy=true;
+openMod('<p class="pf s">TABLERO LUMINOSO</p><p class="q">Mira la secuencia y repítela.</p><div class="pads">'+[0,1,2,3].map(i=>'<button class="pad p'+i+'" aria-label="Luz '+(i+1)+'"></button>').join("")+'</div><p id="tm" class="pf s" style="margin-top:12px"></p>');
+const pads=[...$("mc").querySelectorAll(".pad")];
+const flash=i=>{pads[i].classList.add("lit");tone(262+i*110,.3,"triangle",.09);setTimeout(()=>pads[i].classList.remove("lit"),320)};
+const play=()=>{busy=true;pos=0;seq.forEach((s,i)=>setTimeout(()=>flash(s),700+i*650));setTimeout(()=>busy=false,700+seq.length*650)};
+pads.forEach((p,i)=>p.onclick=()=>{if(busy)return;flash(i);if(i===seq[pos]){if(++pos===seq.length){busy=true;setTimeout(()=>solve("s","cs"),450)}}else{busy=true;bad();$("tm").textContent="Casi. Otra vez.";setTimeout(play,1000)}});
+play()}
+
+$("ct").onclick=()=>textPuz("t","ct","ZAIRE-OS v1.0 · estado: listo para jugar","Para generar una ficha responde: "+C.riddle,C.riddleA);
+$("cs").onclick=simon;$("cm").onclick=memo;$("cr").onclick=react;
+$("cq").onclick=()=>textPuz("q","cq","PREGUNTA DEL PANTANO","Los ogros son como las cebollas. ¿Qué tienen?","capas");
+$("ck").onclick=()=>textPuz("k","ck","CAJÓN CON CANDADO","Dentro hay una nota cifrada: <b>"+C.cipher+"</b>. Cada letra está tres lugares adelante en el alfabeto. Es una fruta.",C.cipherA);
+
+/* máquina de garra */
+const cv=$("cv"),g=cv.getContext("2d"),W=360,H=400,FY=H-26,R=16,pal=["#ff3d9a","#2de2e6","#ffd23f","#a86bff","#5dff9a","#ff8a3d"];
+let caps=[],claw,hold=0,fail=false,running=false;
+function plush(x,y,t,k=1,c=g){c.save();c.translate(x,y);c.scale(k,k);c.fillStyle=PC[t];c.strokeStyle="#000a";c.lineWidth=1.4;
+const B=(a,b,r)=>{c.beginPath();c.arc(a,b,r,0,7);c.fill();c.stroke()},T=(...p)=>{c.beginPath();c.moveTo(p[0],p[1]);for(let i=2;i<p.length;i+=2)c.lineTo(p[i],p[i+1]);c.closePath();c.fill();c.stroke()},E=(a,b,rx,ry,r)=>{c.beginPath();c.ellipse(a,b,rx,ry,r,0,7);c.fill();c.stroke()};
+if(t===0){B(-11,-2,5);B(11,-2,5);B(0,1,12)}
+else if(t===1){E(-7,-11,3.5,8,-.2);E(7,-11,3.5,8,.2);B(0,3,11)}
+else if(t===2){B(-10,0,3.5);B(10,0,3.5);B(-5,12,3.5);B(5,12,3.5);B(0,3,7);B(0,-8,6)}
+else if(t===3){T(-10,-2,-8,-12,-2,-6);T(10,-2,8,-12,2,-6);B(0,3,11);c.fillStyle="#3a2410";c.fillRect(-9,-12,18,7);c.fillRect(-13,-6,26,3)}
+else{T(-9,-4,-12,-14,-3,-8);T(9,-4,12,-14,3,-8);T(-12,6,-17,0,-11,0);T(12,6,17,0,11,0);B(0,2,11)}
+const e=[[-4,-1],[-4,1],[-2,-9],[-4,2],[-4,0]][t];c.fillStyle="#111";c.beginPath();c.arc(e[0],e[1],1.8,0,7);c.fill();c.beginPath();c.arc(-e[0],e[1],1.8,0,7);c.fill();c.restore()}
+function reset(){caps=Array.from({length:9},(_,i)=>({x:100+Math.random()*230,y:-i*45-20,vx:0,vy:0,t:i%5,carried:false,chute:false}));claw={x:200,y:36,s:"idle",open:1,t:0,c:null,slip:null}}
+function step(){
+for(const c of caps){if(c.carried)continue;
+if(c.chute){c.vy+=.5;c.y+=c.vy;if(c.y>FY-R){c.dead=true;onWin(c)}continue}
+c.vy+=.35;c.x+=c.vx;c.y+=c.vy;c.vx*=.99;
+if(c.x<92){c.x=92;c.vx=Math.abs(c.vx)*.5}if(c.x>W-8-R){c.x=W-8-R;c.vx=-Math.abs(c.vx)*.5}}
+for(let k=0;k<3;k++)for(let i=0;i<caps.length;i++)for(let j=i+1;j<caps.length;j++){const a=caps[i],b=caps[j];if(a.carried||b.carried||a.chute||b.chute)continue;
+const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy);if(d<2*R&&d>.01){const o=(2*R-d)/2,nx=dx/d,ny=dy/d;a.x-=nx*o;a.y-=ny*o;b.x+=nx*o;b.y+=ny*o;a.vx-=nx*.05;b.vx+=nx*.05;a.vy*=.97;b.vy*=.97}}
+for(const c of caps){if(c.carried||c.chute)continue;if(c.y>FY-R){c.y=FY-R;c.vy*=-.3;c.vx*=.85;if(Math.abs(c.vy)<.5)c.vy=0}}
+caps=caps.filter(c=>!c.dead);
+const k=claw;
+if(k.s==="idle"){k.x=Math.max(100,Math.min(W-24,k.x+hold*3.2));k.open=Math.min(1,k.open+.05)}
+else if(k.s==="down"){k.y+=3.2;if(k.y>=FY-56||caps.some(c=>!c.carried&&!c.chute&&Math.abs(c.x-k.x)<R+8&&c.y-R<k.y+26)){k.s="close";k.t=0;tone(180,.12,"sawtooth",.05)}}
+else if(k.s==="close"){k.open=Math.max(.2,k.open-.045);if(++k.t===22){let b=null,bd=99;for(const c of caps){if(c.carried||c.chute)continue;const dx=Math.abs(c.x-k.x);if(dx<22&&c.y>k.y+2&&c.y<k.y+52&&dx<bd){b=c;bd=dx}}
+if(b){b.carried=true;k.c=b;k.slip=Math.random()<.4?110+Math.random()*130:null;say(k.slip?"Agarre flojo… ¡cruza los dedos!":"¡Agarre firme!")}else{fail=true;bad();say("Solo atrapaste aire. Te devuelvo la ficha.")}k.s="up"}}
+else if(k.s==="up"){k.y-=2.6;if(k.c&&k.slip&&k.y<k.slip){k.c.carried=false;k.c.vy=0;k.c=null;k.slip=null;fail=true;bad();say("¡Se resbaló! Te devuelvo la ficha.")}
+if(k.y<=36){k.y=36;if(fail){fail=false;setF(fich+1)}k.s=k.c?"carry":"idle"}}
+else if(k.s==="carry"){k.x-=2.4;if(k.x<=38){k.open=1;const c=k.c;c.carried=false;c.chute=true;c.vy=0;c.x=k.x;k.c=null;k.s="idle"}}
+if(k.c){k.c.x=k.x;k.c.y=k.y+30}}
+function draw(){
+const bg=g.createLinearGradient(0,0,0,H);bg.addColorStop(0,"#1b1450");bg.addColorStop(1,"#0a0820");g.fillStyle=bg;g.fillRect(0,0,W,H);
+g.fillStyle="#05040f";g.fillRect(0,FY-70,76,96);g.fillStyle="#ffd23f";g.font="9px 'Press Start 2P',monospace";g.fillText("SALIDA",6,FY-52);
+g.fillStyle="#2a1f6b";g.fillRect(0,FY,W,H-FY);g.fillStyle="#ff3d9a";g.fillRect(0,FY,W,3);g.fillRect(76,FY-70,3,70);g.fillRect(0,14,W,4);
+for(const c of caps)plush(c.x,c.y,c.t);
+const k=claw,o=k.open;g.strokeStyle="#e8e6ff";g.lineWidth=3;g.lineCap="round";g.lineJoin="round";
+g.beginPath();g.moveTo(k.x,16);g.lineTo(k.x,k.y);g.stroke();g.fillStyle="#e8e6ff";g.fillRect(k.x-9,k.y-6,18,10);
+[-1,1].forEach(s=>{g.beginPath();g.moveTo(k.x+s*7,k.y+2);g.lineTo(k.x+s*(10+o*14),k.y+16);g.lineTo(k.x+s*(3+o*9),k.y+32);g.stroke()})}
+function loop(){step();draw();requestAnimationFrame(loop)}
+function bind(id,d){const b=$(id);b.onpointerdown=e=>{e.preventDefault();hold=d};["pointerup","pointerleave","pointercancel"].forEach(n=>b.addEventListener(n,()=>{if(hold===d)hold=0}))}
+bind("lf",-1);bind("rt",1);
+addEventListener("keydown",e=>{if(!running||!$("mod").hidden)return;if(e.key==="ArrowLeft")hold=-1;if(e.key==="ArrowRight")hold=1;if(e.key===" "){e.preventDefault();drop()}});
+addEventListener("keyup",e=>{if(e.key==="ArrowLeft"||e.key==="ArrowRight")hold=0});
+function drop(){const k=claw;if(k.s!=="idle"||wins>=N)return;if(fich<1){bad();say("Sin fichas. Resuelve las estaciones de arriba.");return}setF(fich-1);k.s="down";tone(120,.2,"sawtooth",.05)}
+$("dp").onclick=drop;
+
+function lib(){$("lib").innerHTML=C.digits.map((d,i)=>'<span class="dgt">'+(i<wins?d:"?")+"</span>").join("")}
+function onWin(p){wins++;jingle();lib();
+openMod('<p class="pf s">¡PELUCHE '+wins+'/'+N+': '+PN[p.t]+'!</p><canvas id="pc" class="cap" width="90" height="90"></canvas><p class="q" style="text-align:center">'+C.msgs[wins-1]+'</p><p class="pf s" style="text-align:center">Dígito del código: <span class="dg">'+C.digits[wins-1]+'</span></p>');
+plush(45,48,p.t,2.4,$("pc").getContext("2d"));
+if(wins>=N){$("dp").hidden=true;$("sf").hidden=false;say("¡Código completo! La caja fuerte del fondo ya te espera.")}else say("¡Peluche conseguido! Anota el dígito. Faltan "+(N-wins)+".")}
+
+/* caja fuerte */
+$("sf").onclick=()=>{let e="";
+openMod('<p class="pf s">CAJA FUERTE</p><div class="disp" id="dsp">'+"-".repeat(N)+'</div><div class="keys">'+[1,2,3,4,5,6,7,8,9,"←",0,"OK"].map(n=>'<button class="b'+(n==="OK"?" y":"")+'" data-k="'+n+'">'+n+"</button>").join("")+"</div>");
+const dsp=$("dsp"),show=()=>dsp.textContent=e.padEnd(N,"-");
+$("mc").querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{const k=b.dataset.k;tone(600+(+k||0)*40,.06);
+if(k==="←")e=e.slice(0,-1);else if(k==="OK"){if(e===C.digits.join("")){closeMod();finale();return}bad();dsp.classList.add("sh");setTimeout(()=>dsp.classList.remove("sh"),300);e=""}else if(e.length<N)e+=k;show()})}
+
+function finale(){running=false;jingle();setTimeout(jingle,900);
+$("ft").textContent="MISIÓN COMPLETADA, "+C.name.toUpperCase();$("fm").textContent=C.final;
+$("fv").innerHTML=C.msgs.map(v=>"<li>🧸 "+v+"</li>").join("");$("fin").hidden=false;
+const cn=$("cf"),x=cn.getContext("2d");cn.width=innerWidth;cn.height=innerHeight;
+const P=Array.from({length:150},()=>({x:Math.random()*cn.width,y:-Math.random()*cn.height,v:2+Math.random()*3,s:5+Math.random()*6,c:pal[Math.random()*6|0],r:Math.random()*6}));
+(function f(){x.clearRect(0,0,cn.width,cn.height);P.forEach(p=>{p.y+=p.v;p.r+=.1;if(p.y>cn.height){p.y=-10;p.x=Math.random()*cn.width}x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6);x.restore()});requestAnimationFrame(f)})()}
+
+$("go").onclick=()=>{$("title").hidden=true;$("game").hidden=false;running=true;reset();lib();loop();coin();
+say("SISTEMA: Bienvenida, "+C.name+". Hoy el arcade abre solo para ti. La garra no tiene fichas: gánalas en las seis estaciones.")};
+say("SISTEMA: Esperando jugadora… presiona START.");
+</script>
+</body>
+</html>
